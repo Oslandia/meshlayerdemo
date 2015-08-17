@@ -1,0 +1,16 @@
+[general]
+name=meshlayerdemo
+qgisMinimumVersion=2.6
+description=render wind simulation results
+about=This is an exemple to demonstrate the use of the meshlayer plugin.
+version=0.0.1
+author=Oslandia
+email=infos@oslandia.com
+homepage=https://github.com/Oslandia/meshlayer
+repository=https://github.com/Oslandia/meshlayer
+tracker=https://github.com/Oslandia/thyrsis/meshlayer
+icon=mesh.png
+experimental=True
+deprecated=False
+category=Vector
+tags=simulation
