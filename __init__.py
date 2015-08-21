@@ -20,11 +20,19 @@ class DemoPlugin():
     def initGui(self):
         MeshDataProviderRegistry.instance().addDataProviderType("wind", WindDataProvider)
         QgsPluginLayerRegistry.instance().addPluginLayerType(MeshLayerType())
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
         
         # create open result button
         self.openBtn = QPushButton("Open results")
         self.openBtn.clicked.connect(self.openResults)
         self.openBtnAct = self.iface.addToolBarWidget(self.openBtn)
+
+    def layerWillBeRemoved(self, layerId):
+        layer = QgsMapLayerRegistry.instance().mapLayer(layerId)
+        if isinstance(layer, MeshLayer):
+            for action in self.actions:
+                self.iface.removeToolBarIcon(action)
+            self.actions = []
 
     def openResults(self):
         fil = QFileDialog.getExistingDirectory(None, 
