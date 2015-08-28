@@ -16,10 +16,47 @@ class DemoPlugin():
         self.iface = iface
         self.actions = []
         self.timer = QTimer(None)
+        MeshDataProviderRegistry.instance().addDataProviderType(
+                WindDataProvider.PROVIDER_KEY, 
+                WindDataProvider)
+        self.layerType = MeshLayerType()
+        QgsPluginLayerRegistry.instance().addPluginLayerType(self.layerType)
 
+    def layersAdded(self, layers):
+        for layer in layers:
+            if isinstance(layer, MeshLayer) \
+                    and layer.dataProvider().name() == WindDataProvider.PROVIDER_KEY:
+                # stop animation is running
+                self.timer.stop()
+
+                # remove all action to disconnect signals
+                for action in self.actions:
+                    self.iface.removeToolBarIcon(action)
+                self.actions = []
+                self.timeSlider = None
+                self.playButton = None
+
+                # configure legend
+                layer.colorLegend().setMaxValue( layer.dataProvider().maxValue() )
+                layer.colorLegend().setMinValue( layer.dataProvider().minValue() )
+                layer.colorLegend().setTitle('Wind speed')
+                layer.colorLegend().setUnits('m/s')
+
+                # create slider to animate results
+                self.timeSlider = QSlider(Qt.Horizontal)
+                self.timeSlider.setMinimum(0)
+                self.timeSlider.setMaximum(len(layer.dataProvider().dates())-1)
+                self.actions.append(self.iface.addToolBarWidget(self.timeSlider))
+                self.timeSlider.valueChanged.connect(layer.dataProvider().setDate)
+
+                # create play button
+                self.playButton = QPushButton('play')
+                self.playButton.setCheckable(True)
+                self.actions.append(self.iface.addToolBarWidget(self.playButton))
+                self.playButton.clicked.connect(self.play)
+        
     def initGui(self):
-        MeshDataProviderRegistry.instance().addDataProviderType("wind", WindDataProvider)
-        QgsPluginLayerRegistry.instance().addPluginLayerType(MeshLayerType())
+        QgsMapLayerRegistry.instance().layersAdded.connect(self.layersAdded)
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
         
         # create open result button
@@ -36,46 +73,17 @@ class DemoPlugin():
 
     def openResults(self):
         fil = QFileDialog.getExistingDirectory(None, 
-                u"Répertoire des maillages",
+                u"Open results directory",
                 '')
         if not fil:
             return
 
-        # stop animation is running
-        self.timer.stop()
-
-        # remove all action to disconnect signals
-        for action in self.actions:
-            self.iface.removeToolBarIcon(action)
-        self.actions = []
-        self.timeSlider = None
-        self.playButton = None
-
         # create layer
-        self.meshLayer = MeshLayer(\
+        layer = MeshLayer(\
                 'directory='+fil+' crs=epsg:2154',
                 'mesh layer',
-                'wind')
-
-        # configure legend
-        self.meshLayer.colorLegend().setMaxValue( self.meshLayer.dataProvider().maxValue() )
-        self.meshLayer.colorLegend().setMinValue( self.meshLayer.dataProvider().minValue() )
-        self.meshLayer.colorLegend().setTitle('Wind speed')
-        self.meshLayer.colorLegend().setUnits('m/s')
-        QgsMapLayerRegistry.instance().addMapLayer(self.meshLayer)
-
-        # create slider to animate results
-        self.timeSlider = QSlider(Qt.Horizontal)
-        self.timeSlider.setMinimum(0)
-        self.timeSlider.setMaximum(len(self.meshLayer.dataProvider().dates())-1)
-        self.actions.append(self.iface.addToolBarWidget(self.timeSlider))
-        self.timeSlider.valueChanged.connect(self.meshLayer.dataProvider().setDate)
-
-        # create play button
-        self.playButton = QPushButton('play')
-        self.playButton.setCheckable(True)
-        self.actions.append(self.iface.addToolBarWidget(self.playButton))
-        self.playButton.clicked.connect(self.play)
+                WindDataProvider.PROVIDER_KEY)
+        QgsMapLayerRegistry.instance().addMapLayer(layer)
 
     def unload(self):
         self.iface.removeToolBarIcon(self.openBtnAct)

@@ -58,4 +58,6 @@ class WindDataProvider(MeshDataProvider):
     def minValue(self):
         return min([numpy.min(res) for res in self.__results])
 
+    def name(self):
+        return WindDataProvider.PROVIDER_KEY
     
