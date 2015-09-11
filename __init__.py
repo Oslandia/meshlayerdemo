@@ -67,7 +67,8 @@ class DemoPlugin():
 
     def layerWillBeRemoved(self, layerId):
         layer = QgsMapLayerRegistry.instance().mapLayer(layerId)
-        if isinstance(layer, MeshLayer):
+        if isinstance(layer, MeshLayer) \
+                    and layer.dataProvider().name() == WindDataProvider.PROVIDER_KEY:
             for action in self.actions:
                 self.iface.removeToolBarIcon(action)
             self.actions = []
