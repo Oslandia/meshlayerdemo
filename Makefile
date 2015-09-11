@@ -1,7 +1,7 @@
 FILES=\
     metadata.txt
 
-package: ${FILES} $(wildcard *.py)
+package: ${FILES} $(wildcard *.py) wind_fields
 	rm -rf meshlayerdemo
 	mkdir meshlayerdemo
 	cp -r $^ meshlayerdemo/

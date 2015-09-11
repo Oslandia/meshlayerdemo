@@ -16,11 +16,6 @@ class DemoPlugin():
         self.iface = iface
         self.actions = []
         self.timer = QTimer(None)
-        MeshDataProviderRegistry.instance().addDataProviderType(
-                WindDataProvider.PROVIDER_KEY, 
-                WindDataProvider)
-        self.layerType = MeshLayerType()
-        QgsPluginLayerRegistry.instance().addPluginLayerType(self.layerType)
 
     def layersAdded(self, layers):
         for layer in layers:
@@ -56,6 +51,12 @@ class DemoPlugin():
                 self.playButton.clicked.connect(self.play)
         
     def initGui(self):
+        MeshDataProviderRegistry.instance().addDataProviderType(
+                WindDataProvider.PROVIDER_KEY, 
+                WindDataProvider)
+        self.meshLayerType = MeshLayerType()
+        QgsPluginLayerRegistry.instance().addPluginLayerType(self.meshLayerType)
+
         QgsMapLayerRegistry.instance().layersAdded.connect(self.layersAdded)
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
         
@@ -74,16 +75,16 @@ class DemoPlugin():
     def openResults(self):
         fil = QFileDialog.getExistingDirectory(None, 
                 u"Open results directory",
-                '')
+                os.path.join(os.path.dirname(__file__), "wind_fields"))
         if not fil:
             return
 
         # create layer
-        layer = MeshLayer(\
+        self.layer = MeshLayer(\
                 'directory='+fil+' crs=epsg:2154',
                 'mesh layer',
                 WindDataProvider.PROVIDER_KEY)
-        QgsMapLayerRegistry.instance().addMapLayer(layer)
+        QgsMapLayerRegistry.instance().addMapLayer(self.layer)
 
     def unload(self):
         self.iface.removeToolBarIcon(self.openBtnAct)
