@@ -36,6 +36,7 @@ class DemoPlugin():
                 layer.colorLegend().setMinValue( layer.dataProvider().minValue() )
                 layer.colorLegend().setTitle('Wind speed')
                 layer.colorLegend().setUnits('m/s')
+                layer.colorLegend().setTransparency(.5)
 
                 # create slider to animate results
                 self.timeSlider = QSlider(Qt.Horizontal)
@@ -82,10 +83,28 @@ class DemoPlugin():
 
         # create layer
         self.layer = MeshLayer(\
-                'directory='+fil+' crs=epsg:2154',
+                'directory='+fil+' crs=epsg:27700',
                 'mesh layer',
                 WindDataProvider.PROVIDER_KEY)
         QgsMapLayerRegistry.instance().addMapLayer(self.layer)
+
+        # create a memory layer for triangles
+        self.triangles = QgsVectorLayer("Polygon?crs=epsg:27700", "triangles", "memory")
+        pr = self.triangles.dataProvider()
+        vtx = self.layer.dataProvider().nodeCoord()
+        for idx, tri in enumerate(self.layer.dataProvider().triangles()):
+            fet = QgsFeature()
+            fet.setGeometry(QgsGeometry.fromPolygon([[
+                QgsPoint(vtx[tri[0],0], vtx[tri[0],1]),
+                QgsPoint(vtx[tri[1],0], vtx[tri[1],1]),
+                QgsPoint(vtx[tri[2],0], vtx[tri[2],1]),
+                QgsPoint(vtx[tri[0],0], vtx[tri[0],1])]]))
+            fet.setAttributes([idx+1])
+            pr.addFeatures([fet])
+        self.triangles.updateExtents()
+
+        QgsMapLayerRegistry.instance().addMapLayer(self.triangles)
+
 
     def unload(self):
         self.iface.removeToolBarIcon(self.openBtnAct)
@@ -104,7 +123,7 @@ class DemoPlugin():
         if checked:
             self.timer.stop()
             self.timer.timeout.connect(self.animate)
-            self.timer.start(.1)
+            self.timer.start(200.)
             self.playButton.setText('pause')
         else:
             self.timer.stop()

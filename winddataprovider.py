@@ -34,7 +34,7 @@ class WindDataProvider(MeshDataProvider):
         with open(os.path.join(self.__directory, 'visu_nodes')) as fil:
             for line in fil:
                 xStr, yStr = line.split()
-                coord.append((float(xStr), float(yStr), 0))
+                coord.append((float(xStr)+363000, float(yStr)+656250, 0))
         return numpy.require(coord, numpy.float32)
 
     def triangles(self):
