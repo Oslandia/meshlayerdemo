@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 
+from meshlayer.opengl_layer import OpenGlLayerType, OpenGlLayer
 from meshlayer.meshlayer import MeshLayerType, MeshLayer
 from meshlayer.meshdataproviderregistry import MeshDataProviderRegistry
 from winddataprovider import WindDataProvider
@@ -51,13 +52,16 @@ class DemoPlugin():
                 self.playButton.setCheckable(True)
                 self.actions.append(self.iface.addToolBarWidget(self.playButton))
                 self.playButton.clicked.connect(self.play)
+        print "adding ", layer.name()
         
     def initGui(self):
         MeshDataProviderRegistry.instance().addDataProviderType(
                 WindDataProvider.PROVIDER_KEY, 
                 WindDataProvider)
         self.meshLayerType = MeshLayerType()
+        self.openGlLayerType = OpenGlLayerType()
         QgsPluginLayerRegistry.instance().addPluginLayerType(self.meshLayerType)
+        QgsPluginLayerRegistry.instance().addPluginLayerType(self.openGlLayerType)
 
         QgsMapLayerRegistry.instance().layersAdded.connect(self.layersAdded)
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layerWillBeRemoved)
@@ -71,6 +75,9 @@ class DemoPlugin():
         self.trianglesBtn = QPushButton("Show triangles")
         self.trianglesBtn.clicked.connect(self.createTriangles)
         self.trianglesBtnAct = self.iface.addToolBarWidget(self.trianglesBtn)
+
+        self.olayer = OpenGlLayer(name="my layer")
+        QgsMapLayerRegistry.instance().addMapLayer(self.olayer)
 
     def createTriangles(self):
         if not self.layer:
@@ -121,6 +128,7 @@ class DemoPlugin():
         self.iface.removeToolBarIcon(self.trianglesBtnAct)
         for action in self.actions:
             self.iface.removeToolBarIcon(action)
+        QgsPluginLayerRegistry.instance().removePluginLayerType(OpenGlLayer.LAYER_TYPE)
         QgsPluginLayerRegistry.instance().removePluginLayerType(MeshLayer.LAYER_TYPE)
 
     def animate(self):
