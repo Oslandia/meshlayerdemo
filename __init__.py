@@ -219,7 +219,7 @@ class DemoPlugin():
         if not self.layer:
             return
         # create a memory layer for triangles
-        self.triangles = QgsVectorLayer("Polygon?crs=epsg:2154", "triangles", "memory")
+        self.triangles = QgsVectorLayer("Polygon?crs=epsg:27572", "triangles", "memory")
         pr = self.triangles.dataProvider()
         vtx = self.layer.dataProvider().nodeCoord()
         features = []
@@ -257,7 +257,7 @@ class DemoPlugin():
         if os.path.exists(os.path.join(fil, "Q100-83aQ100-83a_z1.z1")):
             print "hydra results"
             self.layer = MeshLayer(
-                    'basename='+os.path.join(fil, 'Q100-83aQ100-83a_z1')+' crs=epsg:2154',
+                    'basename='+os.path.join(fil, 'Q100-83aQ100-83a_z1')+' crs=epsg:27572',
                     'mesh layer',
                     HydraDataProvider.PROVIDER_KEY)
         else:

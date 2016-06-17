@@ -30,8 +30,9 @@ class HydraDataProvider(MeshDataProvider):
     def nodeCoord(self):
         with open(self.__basename+'.z1', 'rb') as f:
             nb_nodes, nb_elem  = numpy.frombuffer(f.read(8), dtype=numpy.int32)
-            return  numpy.array(numpy.frombuffer(f.read(8*3*nb_nodes), dtype=numpy.float64).reshape(-1,3), dtype=numpy.float32)
-
+            xyz = numpy.array(numpy.frombuffer(f.read(8*3*nb_nodes), dtype=numpy.float64).reshape(-1,3), dtype=numpy.float32)
+            xyz[:,1] += 1000
+            return xyz
     def triangles(self):
         with open(self.__basename+'.z1', 'rb') as f:
             nb_nodes, nb_elem  = numpy.frombuffer(f.read(8), dtype=numpy.int32)
@@ -55,13 +56,11 @@ class HydraDataProvider(MeshDataProvider):
         with open(self.__basename+'.z2', 'rb') as f:
             nb_nodes, nb_th  = numpy.frombuffer(f.read(8), dtype=numpy.int32)
             return numpy.max(
-                numpy.frombuffer(f.read(), dtype=numpy.float32).reshape(nb_th, -1)[:,1:])
+                numpy.frombuffer(f.read(), dtype=numpy.float32).reshape(nb_th, -1)[:,1:] - self.nodeCoord()[:,2])
 
     def minValue(self):
-        with open(self.__basename+'.z2', 'rb') as f:
-            nb_nodes, nb_th  = numpy.frombuffer(f.read(8), dtype=numpy.int32)
-            return numpy.min(
-                numpy.frombuffer(f.read(), dtype=numpy.float32).reshape(nb_th, -1)[:,1:])
+        return 0
+              
 
     def name(self):
         return HydraDataProvider.PROVIDER_KEY
@@ -69,7 +68,7 @@ class HydraDataProvider(MeshDataProvider):
 
 if __name__=='__main__':
     import sys
-    provider = HydraDataProvider('basename='+sys.argv[1]+' crs=epsg:2154')
+    provider = HydraDataProvider('basename='+sys.argv[1]+' crs=epsg:27572')
     print provider.dates()
     print len(provider.nodeCoord())
     print len(provider.triangles())
