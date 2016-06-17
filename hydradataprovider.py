@@ -30,9 +30,8 @@ class HydraDataProvider(MeshDataProvider):
     def nodeCoord(self):
         with open(self.__basename+'.z1', 'rb') as f:
             nb_nodes, nb_elem  = numpy.frombuffer(f.read(8), dtype=numpy.int32)
-            xyz = numpy.array(numpy.frombuffer(f.read(8*3*nb_nodes), dtype=numpy.float64).reshape(-1,3), dtype=numpy.float32)
-            xyz[:,1] += 1000
-            return xyz
+            return numpy.array(numpy.frombuffer(f.read(8*3*nb_nodes), dtype=numpy.float64).reshape(-1,3), dtype=numpy.float32)
+
     def triangles(self):
         with open(self.__basename+'.z1', 'rb') as f:
             nb_nodes, nb_elem  = numpy.frombuffer(f.read(8), dtype=numpy.int32)
