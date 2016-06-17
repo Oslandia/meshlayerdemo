@@ -19,7 +19,7 @@ Oslandia provides support and assistance for QGIS and associated tools, includin
 
 Hydrology simulation dataset is courtesy of Hydratec (http://www.hydratec.setec.fr/)
 
-Wind simulation dataset is courtesy of Sephy Science ( http://www.zephy-science.com/ )
+Wind simulation dataset is courtesy of Zephy Science ( http://www.zephy-science.com/ )
 
 
 License
