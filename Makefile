@@ -1,5 +1,6 @@
 FILES=\
-    metadata.txt
+    metadata.txt\
+    meshlayer
 
 package: ${FILES} $(wildcard *.py) wind_fields hydro
 	rm -rf meshlayerdemo

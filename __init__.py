@@ -1,13 +1,14 @@
 # -*- coding: UTF-8 -*-
 
-from meshlayer.glmesh import roundUpSize
-from meshlayer.opengl_layer import OpenGlLayerType, OpenGlLayer
-from meshlayer.meshlayer import MeshLayerType, MeshLayer
-from meshlayer.meshdataproviderregistry import MeshDataProviderRegistry
-from winddataprovider import WindDataProvider
-from hydradataprovider import HydraDataProvider
-
 from qgis.core import *
+
+from .meshlayer.glmesh import roundUpSize
+from .meshlayer.opengl_layer import OpenGlLayerType, OpenGlLayer
+from .meshlayer.meshlayer import MeshLayerType, MeshLayer
+from .meshlayer.meshdataproviderregistry import MeshDataProviderRegistry
+from .winddataprovider import WindDataProvider
+from .hydradataprovider import HydraDataProvider
+
 
 from PyQt4.QtOpenGL import QGLPixelBuffer, QGLFormat
 from PyQt4.QtCore import *
@@ -237,6 +238,23 @@ class DemoPlugin():
         self.triangles.updateExtents()
 
         QgsMapLayerRegistry.instance().addMapLayer(self.triangles)
+
+        self.vertices = QgsVectorLayer("Point?crs=epsg:27572&field=id:integer&field=altitude:double", "vertices", "memory")
+        pr = self.vertices.dataProvider()
+        features = []
+        for idx, v in enumerate(vtx):
+            if idx< 10:
+                print idx, v
+            #if idx > 10000: break
+            fet = QgsFeature()
+            fet.setGeometry(QgsGeometry.fromPoint(QgsPoint(v[0], v[1])))
+            fet.setAttributes([idx+1, float(v[2])])
+            features.append(fet)
+        pr.addFeatures(features)
+        self.vertices.updateExtents()
+
+        QgsMapLayerRegistry.instance().addMapLayer(self.vertices)
+
 
     def layerWillBeRemoved(self, layerId):
         layer = QgsMapLayerRegistry.instance().mapLayer(layerId)
